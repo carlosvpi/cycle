@@ -1,0 +1,23 @@
+{
+  "name": "cycle",
+  "version": "0.0.0",
+  "description": "MVC framework for the front end",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CarlosVazPI/cycle.git"
+  },
+  "keywords": [
+    "mvc",
+    "framework"
+  ],
+  "author": "Carlos Vazquez",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CarlosVazPI/cycle/issues"
+  },
+  "homepage": "https://github.com/CarlosVazPI/cycle#readme"
+}
