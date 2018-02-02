@@ -145,7 +145,7 @@ Todo = ({ id, status, text, editingTodoId }) => El('DIV', [
     El('INPUT', [], {
         class: 'toggle',
         type: 'checkbox',
-        checked: status === 'Completed' || undefined,
+        CHECKED: status === 'Completed' || undefined,
         onclick: `switchStatus(${id})`
     }),
     El('LABEL', [T(text)], {
@@ -170,9 +170,3 @@ state = setFilter('All')
 // 
 
 getRender(TodoApp, document.getElementById('root'))()
-
-// render = (gR => () => gR(getState()))(getRenderer(TodoApp, document.getElementById('root')))
-// render()
-
-
-

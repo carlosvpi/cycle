@@ -31,7 +31,9 @@ The definition of an action is a function `(...params) => state => newState` tha
 
 The updater function returned by `action(...)` takes some parameters (that corresponds to the parameters that the definition takes), updates the state and re-renders the view.
 
-The updater function has an attribute `definition` pointing to the definition passed to action that created the updater function.
+The updater function has the following attributes
+- `definition`: is the definition function passed to action that created the updater function.
+- `onlyUpdate`: can be used with the same parameters as the updater itself, but doesn't re-render the view (only updates the state). Returns the updated state. 
 
 When called, the updater function returns the render promise.
 
@@ -49,7 +51,11 @@ It is a promise such that the resolve function takes the rendered node root of t
 
 ## Nodes
 
-### El
+### El(tag, children, attributes)
+
+`tag` is an uppercase string indicating the tag of the element.
+`children` is a list of child virtual Dom nodes.
+`attributes` is an object containing the attributes to be added to the element. Attributes in lower case will be added via `setAttribute`, while attributes in upper case (or just capital case) will be added directly to the node.
 
 ### T
 

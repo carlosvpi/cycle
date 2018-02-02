@@ -18,21 +18,34 @@ const mount = (data, node, parentNode) => {
         const attrKeysLength = attrKeys.length
         const oldAttributesKeys = currentNode.getAttributeNames()
         const oldAttributesKeysLength = oldAttributesKeys.length
-        let attribute
+        let attributeKey
+        let isDirectAttribute
 
         // Remove old attributes
         for (let i = 0; i < oldAttributesKeysLength; i++) {
-            attribute = oldAttributesKeys[i]
-            if (!attrKeys.includes(attribute) || attrs[attribute] === undefined) {
-                currentNode.removeAttribute(attribute)
+            attributeKey = oldAttributesKeys[i]
+            isDirectAttribute = attributeKey.charAt(0) === attributeKey.charAt(0).toUpperCase()
+            if (!attrKeys.includes(attributeKey) || attrs[attributeKey] === undefined) {
+                if (isDirectAttribute) {
+                    currentNode[attributeKey.toLowerCase()] = undefined
+                } else {
+                    currentNode.removeAttribute(attributeKey)
+                }
             }
         }
 
         // Set new attributes
         for (let i = 0; i < attrKeysLength; i++) {
-            attribute = attrKeys[i]
-            if (attrs[attribute] !== undefined) {
-                currentNode.setAttribute(attribute, attrs[attribute])
+            attributeKey = attrKeys[i]
+            isDirectAttribute = attributeKey.charAt(0) === attributeKey.charAt(0).toUpperCase()
+            if (attrs[attributeKey] !== undefined) {
+                if (isDirectAttribute) {
+                    currentNode[attributeKey.toLowerCase()] = attrs[attributeKey]
+                } else {
+                    currentNode.setAttribute(attributeKey, attrs[attributeKey])
+                }
+            } else if (isDirectAttribute) {
+                currentNode[attributeKey.toLowerCase()] = undefined
             }
         }        
     }
@@ -43,15 +56,22 @@ const mount = (data, node, parentNode) => {
         const childrenKeysLength = children.length
         const oldChildrenKeys = oldChildren.map(getKey)
         const oldChildrenLength = oldChildren.length
+        const childrenByKey = children.reduce((acc, child, i) => (acc[child.key || i] = child, acc), {})
+        let key
+
+        if (attrs.id === 'main') {
+            // debugger
+        }
 
         // Remove or update old children
         for (let i = 0; i < oldChildrenLength; i++) {
-            if (!childrenKeys.includes(oldChildren[i].key || i)) {
+            key = oldChildren[i].key || i
+            if (!childrenKeys.includes(key)) {
                 currentNode.removeChild(oldChildren[i].node)
             } else if (isPreserved) {
-                mount(children[i], oldChildren[i].node, currentNode)
+                mount(childrenByKey[key], oldChildren[i].node, currentNode)
             } else {
-                mount(children[i], null, currentNode)
+                mount(childrenByKey[key], null, currentNode)
             }
         }
 
@@ -59,10 +79,12 @@ const mount = (data, node, parentNode) => {
 
         // Add children
         for (let i = 0; i < childrenKeysLength; i++) {
-            if (!oldChildrenKeys.includes(children[i].key || i)) {
-                mount(children[i], null, currentNode)
+            key = children[i].key || i
+            if (!oldChildrenKeys.includes(key)) {
+                mount(childrenByKey[key], null, currentNode)
             // } else {
             //     /* Careful with this line... needs test */
+            //     /* Probably redundant */
             //     mount(children[i], oldChildren[i].node, currentNode)
             }
         }
@@ -141,18 +163,22 @@ const ctrlProto = {
     },
     action: function action(def) {
         const actionInstance = params => {
-            this.state = def(params)(this.state)
+            actionInstance.onlyUpdate(params)
             return this.render && this.render()
         }
         actionInstance.definition = def
+        actionInstance.onlyUpdate = params => {
+            return this.state = def(params)(this.state)
+        }
         return actionInstance
     },
     getRender: function getRender(builder, host) {
         let node = null
         return this.render = this.render || (() => {
+            const vDom = builder(this.state)
             return new Promise((resolve, reject) => {
                 window.requestAnimationFrame(() => {
-                    node = mount(builder(this.state), node, host)
+                    node = mount(vDom, node, host)
                     if (node) {
                         resolve(node)
                     } else {
